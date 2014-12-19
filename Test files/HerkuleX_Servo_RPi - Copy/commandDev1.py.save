@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+import pika
+import time
+
+rabbitMQHost = 'localhost'
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+channel = connection.channel()
+channel2 = connection.channel()
+
+channel.queue_declare(queue='commandData')
+
+
+e(queue='commandData')
+
+print ' [*] Waiting for messages. To exit press CTRL+C'
+
+def callback(ch, method, properties, body):
+	ticks = time.time()
+	commandSendTime = float(body.split(',')[2])
+	if ticks >= (commandSendTime + 5):
+		print "commandData too old"
+	else:
+		print " [x] Received %r" % (body,)
+		# print commandSendTime
+		# print ticks
+
+channel.basic_consume(callback,queue='commandData',no_ack=True)
+
+channel.start_consuming()
+
+
